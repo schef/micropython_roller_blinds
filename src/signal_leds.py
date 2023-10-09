@@ -3,9 +3,9 @@ import common
 import leds
 import mqtt
 
-BOOT_LED = "ONBOARD_LED1"
-ACTIVITY_LED = "ONBOARD_LED2"
-MQTT_LED = "ONBOARD_LED3"
+BOOT_LED = "ONBOARD_LED"
+ACTIVITY_LED = "B_LED1"
+MQTT_LED = "B_LED2"
 activity_timestamp = None
 activity_timeout = 100
 

@@ -5,15 +5,8 @@ import common_pins
 on_state_change_cb = None
 buttons = []
 
-button_pins = [common_pins.ONBOARD_BUTTON,
-               common_pins.B1_SW1,
+button_pins = [common_pins.B1_SW1,
                common_pins.B1_SW2,
-               common_pins.B2_SW1,
-               common_pins.B2_SW2,
-               common_pins.B3_SW1,
-               common_pins.B3_SW2,
-               common_pins.B4_SW1,
-               common_pins.B4_SW2
                ]
 
 

@@ -15,8 +15,8 @@ class R4D3B16():
     CLOSED = 2
     NUM_OF_CHANNELS = 8
 
-    def __init__(self):
-        self.uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1), timeout=300)
+    def __init__(self, uart_instance, pin_tx, pin_rx, timeout=300):
+        self.uart = UART(uart_instance, baudrate=9600, tx=Pin(pin_tx), rx=Pin(pin_rx), timeout=timeout)
         self.direction_pin = Pin(6, Pin.OUT)
 
     def get_check_sum(self, data):

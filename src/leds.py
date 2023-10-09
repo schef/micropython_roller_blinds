@@ -2,48 +2,26 @@ import uasyncio as asyncio
 import time
 import common
 import common_pins
+from driver_r4d3b8 import R4D3B16
 
 relays = []
+relay_board = None
 leds = []
 
 relay_pins = [
-    common_pins.RELAY_8,
-    common_pins.RELAY_7,
-    common_pins.RELAY_6,
-    common_pins.RELAY_5,
-    common_pins.RELAY_4,
-    common_pins.RELAY_3,
-    common_pins.RELAY_2,
     common_pins.RELAY_1,
-    common_pins.RELAY_9,
-    common_pins.RELAY_10,
-    common_pins.RELAY_11,
-    common_pins.RELAY_12,
-    common_pins.RELAY_13,
-    common_pins.RELAY_14,
-    common_pins.RELAY_15,
-    common_pins.RELAY_16
+    common_pins.RELAY_2,
+    common_pins.RELAY_3,
+    common_pins.RELAY_4,
+    common_pins.RELAY_5,
+    common_pins.RELAY_6,
+    common_pins.RELAY_7,
+    common_pins.RELAY_8,
 ]
 led_pins = [
-    common_pins.ONBOARD_LED1,
-    common_pins.ONBOARD_LED2,
-    common_pins.ONBOARD_LED3,
-    common_pins.B4_LED1_GB,
-    common_pins.B4_LED1_R,
-    common_pins.B4_LED2_GB,
-    common_pins.B4_LED2_R,
-    common_pins.B3_LED1_GB,
-    common_pins.B3_LED1_R,
-    common_pins.B3_LED2_GB,
-    common_pins.B3_LED2_R,
-    common_pins.B2_LED1_GB,
-    common_pins.B2_LED1_R,
-    common_pins.B2_LED2_GB,
-    common_pins.B2_LED2_R,
-    common_pins.B1_LED1_GB,
-    common_pins.B1_LED1_R,
-    common_pins.B1_LED2_GB,
-    common_pins.B1_LED2_R
+    common_pins.ONBOARD_LED,
+    common_pins.B_LED1,
+    common_pins.B_LED2
 ]
 
 
@@ -66,6 +44,28 @@ class Led:
                 self.output.on()
             else:
                 self.output.off()
+        self.state = state
+
+class Relay:
+    def __init__(self, id, name, relay_board, active_high=False):
+        self.id = id
+        self.name = name
+        self.relay_board = relay_board
+        self.active_high = active_high
+        self.state = None
+        self.set_state(0)
+
+    def set_state(self, state):
+        if self.active_high:
+            if state:
+                self.relay_board.set_relay_off(self.id)
+            else:
+                self.relay_board.set_relay_on(self.id)
+        else:
+            if state:
+                self.relay_board.set_relay_on(self.id)
+            else:
+                self.relay_board.set_relay_off(self.id)
         self.state = state
 
 
@@ -126,8 +126,10 @@ def test_leds():
 
 
 def init_relays():
+    global relay_board
+    relay_board = R4D3B16(common_pins.UART0_INSTANCE.id, common_pins.UART0_TX.id, common_pins.UART0_RX.id)
     for pin in relay_pins:
-        relays.append(Led(pin.id, pin.name))
+        relays.append(Relay(pin.id, pin.name, relay_board))
 
 
 def init_leds():
