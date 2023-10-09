@@ -17,7 +17,7 @@ class R4D3B16():
 
     def __init__(self):
         self.uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1), timeout=300)
-        self.direction_pin = Pin(2, Pin.OUT)
+        self.direction_pin = Pin(6, Pin.OUT)
 
     def get_check_sum(self, data):
         data = bytearray(data)
