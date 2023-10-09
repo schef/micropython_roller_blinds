@@ -16,7 +16,7 @@ class R4D3B16():
     NUM_OF_CHANNELS = 8
 
     def __init__(self):
-        self.uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+        self.uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1), timeout=300)
         self.direction_pin = Pin(2, Pin.OUT)
 
     def get_check_sum(self, data):
@@ -66,14 +66,22 @@ class R4D3B16():
         packet.append(check_sum[1])
         return packet
 
-    def set_relay_on(self, index):
-        packet = self.generate_control_instruction(self.CMD_TURN_ON, index)
+    def write(self, packet):
         self.direction_pin.value(1)
         self.uart.write(bytes(packet))
         self.uart.flush()
+
+    def read(self, len):
         self.direction_pin.value(0)
-        read_packet = list(self.uart.read(self.CONTROL_INSTRUCTION_RESPONSE_LEN))
-        print(read_packet)
+        ret = self.uart.read(len)
+        if ret is not None:
+            return list(ret)
+        return []
+
+    def set_relay_on(self, index):
+        packet = self.generate_control_instruction(self.CMD_TURN_ON, index)
+        self.write(packet)
+        read_packet = self.read(self.CONTROL_INSTRUCTION_RESPONSE_LEN)
         if read_packet is not None and len(read_packet) == self.CONTROL_INSTRUCTION_RESPONSE_LEN:
             crc = read_packet[-2:]
             expected_crc = self.get_check_sum(read_packet[:-2])
@@ -90,12 +98,8 @@ class R4D3B16():
 
     def set_relay_off(self, index):
         packet = self.generate_control_instruction(self.CMD_SHUT_DOWN, index)
-        self.direction_pin.value(1)
-        self.uart.write(bytes(packet))
-        self.uart.flush()
-        self.direction_pin.value(0)
-        read_packet = list(self.uart.read(self.CONTROL_INSTRUCTION_RESPONSE_LEN))
-        print(read_packet)
+        self.write(packet)
+        read_packet = self.read(self.CONTROL_INSTRUCTION_RESPONSE_LEN)
         if read_packet is not None and len(read_packet) == self.CONTROL_INSTRUCTION_RESPONSE_LEN:
             crc = read_packet[-2:]
             expected_crc = self.get_check_sum(read_packet[:-2])
@@ -112,12 +116,8 @@ class R4D3B16():
 
     def get_relay_state(self, index):
         packet = self.generate_read_status(index)
-        self.direction_pin.value(1)
-        self.uart.write(bytes(packet))
-        self.uart.flush()
-        self.direction_pin.value(0)
-        read_packet = list(self.uart.read(self.READ_STATUS_RESPONSE_LEN))
-        print(read_packet)
+        self.write(packet)
+        read_packet = self.read(self.READ_STATUS_RESPONSE_LEN)
         if read_packet is not None and len(read_packet) == self.READ_STATUS_RESPONSE_LEN:
             crc = read_packet[-2:]
             expected_crc = self.get_check_sum(read_packet[:-2])
@@ -133,5 +133,4 @@ class R4D3B16():
         return None
 
     def is_responsive(self):
-        state = self.get_relay_state(0x01)
-        return state is not None
+        return self.get_relay_state(0x01) is not None
