@@ -1,5 +1,0 @@
-server = '192.168.1.200'
-username = ''
-password = ''
-ssid = 'esschef2'
-password = 'babyaria123'
